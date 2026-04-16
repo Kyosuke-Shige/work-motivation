@@ -254,6 +254,36 @@
       letter-spacing: -0.005em;
     }
 
+    /* ===== Trivia ===== */
+    .counter-trivia {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: var(--text-dim);
+      min-height: 42px;
+      opacity: 1;
+      transition: opacity 0.28s ease;
+      letter-spacing: -0.002em;
+    }
+    .counter-trivia.fade { opacity: 0; }
+    .counter-trivia:empty { display: none; }
+    .counter-trivia .kind {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-quiet);
+      letter-spacing: 0.04em;
+      margin-right: 8px;
+      transform: translateY(-1px);
+    }
+    .counter-trivia .num {
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+    }
+
     /* ===== Buttons ===== */
     .actions {
       margin-top: 0;
@@ -498,6 +528,9 @@
             <div class="counter-meta-value" id="counterPerSec">¥0</div>
           </div>
         </div>
+        <div class="counter-trivia" id="counterTrivia">
+          <span id="triviaText"></span>
+        </div>
       </div>
 
       <div class="actions">
@@ -591,6 +624,78 @@
       const dd = d.getDate().toString().padStart(2, '0');
       return `${y}.${mm}.${dd}`;
     };
+    const fmtDurationLoose = (sec) => {
+      sec = Math.max(1, Math.floor(sec));
+      if (sec < 60) return `${sec}秒`;
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      if (m < 60) return s > 0 ? `${m}分${s}秒` : `${m}分`;
+      const h = Math.floor(m / 60);
+      const mm2 = m % 60;
+      return mm2 > 0 ? `${h}時間${mm2}分` : `${h}時間`;
+    };
+    const jpNum = (n) => Math.round(n).toLocaleString('ja-JP');
+    const jpNum1 = (n) => {
+      const v = Math.round(n * 10) / 10;
+      return v.toLocaleString('ja-JP', { maximumFractionDigits: 1 });
+    };
+
+    // ===== Trivia Data =====
+    // 1秒あたりのざっくり推定値。数字は概算で、読み物として楽しめる桁感を優先。
+    const WORLD_FACTS = [
+      (s) => `新生児が <span class="num">${jpNum(4.3 * s)}人</span> この世に生まれた`,
+      (s) => `<span class="num">${jpNum(1.8 * s)}人</span> が 息を引き取った`,
+      (s) => `心臓が <span class="num">${jpNum(1.1 * s)}回</span> 鼓動した`,
+      (s) => `地球が太陽の周りを <span class="num">${jpNum(30 * s)}km</span> 進んだ`,
+      (s) => `Google検索が <span class="num">${jpNum(100000 * s)}回</span> 実行された`,
+      (s) => `X（旧Twitter）に <span class="num">${jpNum(6000 * s)}件</span> 投稿された`,
+      (s) => `YouTubeに <span class="num">${jpNum1(8.33 * s)}時間分</span> の動画がアップされた`,
+      (s) => `ビル・ゲイツの資産が 約<span class="num">${jpNum(300 * s)}ドル</span> 増えた`,
+      (s) => `マクドナルドで <span class="num">${jpNum(75 * s)}個</span> バーガーが売れた`,
+      (s) => `Amazonが <span class="num">${jpNum(460 * s)}個</span> 荷物を配達した`,
+      (s) => `世界で <span class="num">${jpNum(22000 * s)}本</span> コカ・コーラが開けられた`,
+      (s) => `<span class="num">${jpNum1(7.5 * s)}台</span> iPhoneが販売された`,
+      (s) => `世界の空港に <span class="num">${jpNum(s)}機</span> 飛行機が着陸した`,
+      (s) => `世界で <span class="num">${jpNum(1270 * s)}kg</span> の CO₂ が排出された`,
+      (s) => `日本のコンビニで <span class="num">${jpNum(55 * s)}個</span> おにぎりが売れた`,
+      (s) => `Wikipediaが <span class="num">${jpNum(2 * s)}回</span> 編集された`,
+      (s) => `Netflixが <span class="num">${jpNum1(3400 * s)}時間</span> 視聴された`,
+      (s) => `世界で <span class="num">${jpNum(2800000 * s)}通</span> メールが送信された`,
+      (s) => `日本でビールが <span class="num">${jpNum(180 * s)}本</span> 開けられた`,
+      (s) => `日本のタクシーが 延べ <span class="num">${jpNum(30 * s)}台</span> 乗車された`,
+    ];
+
+    const ERAS = [
+      { era: '明治10年', job: '小学校教師', monthlyYen: 10 },
+      { era: '明治40年', job: '夏目漱石の朝日新聞社員', monthlyYen: 200 },
+      { era: '大正元年', job: '銀行員', monthlyYen: 50 },
+      { era: '大正14年', job: '総理大臣', monthlyYen: 800 },
+      { era: '昭和5年', job: '国家公務員（大卒初任給）', monthlyYen: 75 },
+      { era: '昭和30年', job: '大卒初任給', monthlyYen: 5600 },
+      { era: '昭和40年', job: '大卒初任給', monthlyYen: 19610 },
+      { era: '昭和50年', job: '大卒初任給', monthlyYen: 89300 },
+      { era: '昭和60年', job: '大卒初任給', monthlyYen: 140000 },
+      { era: '平成10年', job: '大卒初任給', monthlyYen: 195500 },
+      { era: '令和6年', job: '大卒初任給', monthlyYen: 237300 },
+    ];
+
+    function renderTriviaLine(elapsedSec, earned) {
+      if (elapsedSec < 1) return '';
+      if (triviaMode === 'world') {
+        const fact = WORLD_FACTS[triviaWorldIdx];
+        return `<span class="kind">WORLD</span>この${fmtDurationLoose(elapsedSec)}で、世界では ${fact(elapsedSec)}`;
+      } else {
+        const era = ERAS[triviaEraIdx];
+        const months = earned / era.monthlyYen;
+        let display;
+        if (months >= 1200)       display = `<span class="num">${(months / 12).toFixed(0)}年</span>`;
+        else if (months >= 12)    display = `<span class="num">${(months / 12).toFixed(1)}年</span>`;
+        else if (months >= 1)     display = `<span class="num">${months.toFixed(1)}ヶ月</span>`;
+        else if (months >= 1/30)  display = `<span class="num">${(months * 30).toFixed(1)}日</span>`;
+        else                      display = `<span class="num">${(months * 30 * 8).toFixed(2)}時間</span>`;
+        return `<span class="kind">ERA</span><span class="num">${fmtYen(earned)}</span> は ${era.era}の${era.job} ${display}ぶんの月給`;
+      }
+    }
 
     // ===== Elements =====
     const el = {
@@ -606,6 +711,8 @@
       counterNumber: document.getElementById('counterNumber'),
       counterElapsed: document.getElementById('counterElapsed'),
       counterPerSec: document.getElementById('counterPerSec'),
+      counterTrivia: document.getElementById('counterTrivia'),
+      triviaText: document.getElementById('triviaText'),
       startBtn: document.getElementById('startBtn'),
       endBtn: document.getElementById('endBtn'),
       settingsBtn: document.getElementById('settingsBtn'),
@@ -621,6 +728,17 @@
 
     // ===== State =====
     let tickTimer = null;
+    let triviaTimer = null;
+    let triviaMode = 'world';
+    let triviaWorldIdx = 0;
+    let triviaEraIdx = 0;
+
+    function pickRandomIdx(len, prev) {
+      if (len <= 1) return 0;
+      let i;
+      do { i = Math.floor(Math.random() * len); } while (i === prev);
+      return i;
+    }
 
     // ===== Rendering =====
     function showSetup() {
@@ -655,6 +773,7 @@
         el.counterLabel.textContent = '本日の稼ぎ';
         el.startBtn.hidden = true;
         el.endBtn.hidden = false;
+        el.triviaText.innerHTML = renderTriviaLine(elapsedSec, earned);
       } else {
         el.counterNumber.textContent = '0';
         el.counterElapsed.textContent = '00:00:00';
@@ -664,16 +783,42 @@
         el.counterLabel.textContent = '本日の稼ぎ';
         el.startBtn.hidden = false;
         el.endBtn.hidden = true;
+        el.triviaText.innerHTML = '';
       }
+    }
+
+    function rotateTrivia() {
+      triviaMode = triviaMode === 'world' ? 'era' : 'world';
+      if (triviaMode === 'world') triviaWorldIdx = pickRandomIdx(WORLD_FACTS.length, triviaWorldIdx);
+      else triviaEraIdx = pickRandomIdx(ERAS.length, triviaEraIdx);
+      el.counterTrivia.classList.add('fade');
+      setTimeout(() => {
+        renderCounter();
+        el.counterTrivia.classList.remove('fade');
+      }, 260);
+    }
+
+    function startTriviaTimer() {
+      stopTriviaTimer();
+      // Kick off with a random starting mode + freshly picked items
+      triviaMode = Math.random() < 0.5 ? 'world' : 'era';
+      triviaWorldIdx = pickRandomIdx(WORLD_FACTS.length, -1);
+      triviaEraIdx = pickRandomIdx(ERAS.length, -1);
+      triviaTimer = setInterval(rotateTrivia, 6500);
+    }
+    function stopTriviaTimer() {
+      if (triviaTimer) { clearInterval(triviaTimer); triviaTimer = null; }
     }
 
     function startTick() {
       stopTick();
+      startTriviaTimer();
       renderCounter();
       tickTimer = setInterval(renderCounter, 1000);
     }
     function stopTick() {
       if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
+      stopTriviaTimer();
     }
 
     function renderHistory() {
