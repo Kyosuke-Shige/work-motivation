@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="稼ぎカウント">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>稼ぎカウント</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --surface-2: #1c1c1c;
+      --border: #2a2a2a;
+      --text: #f5f5f5;
+      --text-dim: #8a8a8a;
+      --accent: #d4af37;
+      --accent-glow: rgba(212, 175, 55, 0.25);
+      --success: #4ade80;
+      --danger: #ef4444;
+      --font-ja: 'Noto Sans JP', sans-serif;
+      --font-en: 'Inter', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-en), var(--font-ja), sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
+
+    body {
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    main {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 20px 20px 40px;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== Header ===== */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .brand {
+      font-family: var(--font-ja);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      color: var(--text-dim);
+    }
+    .icon-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 22px;
+      cursor: pointer;
+      padding: 8px;
+      transition: color 0.2s;
+    }
+    .icon-btn:active { color: var(--text); }
+
+    /* ===== Setup View ===== */
+    #setupView {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 32px;
+      padding: 40px 0;
+    }
+    .setup-title {
+      font-family: var(--font-ja);
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+    }
+    .setup-form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .field label {
+      font-family: var(--font-ja);
+      font-size: 13px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+    .field input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font-en);
+      font-size: 24px;
+      font-weight: 600;
+      padding: 14px 16px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    .field input:focus { border-color: var(--accent); }
+    .field .hint {
+      font-family: var(--font-ja);
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* ===== Main View ===== */
+    #mainView {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .counter-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px 0;
+      gap: 24px;
+    }
+
+    .counter-label {
+      font-family: var(--font-ja);
+      font-size: 13px;
+      color: var(--text-dim);
+      letter-spacing: 0.2em;
+    }
+
+    .counter-amount {
+      font-family: var(--font-en);
+      font-size: clamp(48px, 13vw, 80px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--accent);
+      text-shadow: 0 0 60px var(--accent-glow);
+      font-variant-numeric: tabular-nums;
+      transition: transform 0.15s ease-out;
+    }
+    .counter-amount.pulse {
+      animation: pulse 0.15s ease-out;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.015); }
+      100% { transform: scale(1); }
+    }
+
+    .counter-amount.idle {
+      color: var(--text-dim);
+      text-shadow: none;
+    }
+
+    .counter-sub {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+    }
+    .counter-sub-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: center;
+    }
+    .counter-sub-label {
+      font-family: var(--font-ja);
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+    .counter-sub-value {
+      font-family: var(--font-en);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .counter-sub-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--border);
+    }
+
+    /* ===== Buttons ===== */
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .btn {
+      font-family: var(--font-ja);
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      padding: 18px 24px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    /* ===== History ===== */
+    .history {
+      margin-top: 40px;
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 16px;
+    }
+    .history-title {
+      font-family: var(--font-ja);
+      font-size: 13px;
+      color: var(--text-dim);
+      letter-spacing: 0.2em;
+    }
+    .history-total {
+      font-family: var(--font-en);
+      font-size: 13px;
+      color: var(--text-dim);
+      font-variant-numeric: tabular-nums;
+    }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .history-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .history-item:last-child { border-bottom: none; }
+    .history-date {
+      font-family: var(--font-en);
+      font-size: 13px;
+      color: var(--text-dim);
+      font-variant-numeric: tabular-nums;
+    }
+    .history-duration {
+      font-family: var(--font-en);
+      font-size: 12px;
+      color: var(--text-dim);
+      font-variant-numeric: tabular-nums;
+    }
+    .history-amount {
+      font-family: var(--font-en);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .history-empty {
+      padding: 20px 0;
+      text-align: center;
+      color: var(--text-dim);
+      font-family: var(--font-ja);
+      font-size: 13px;
+    }
+    .history-delete {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 16px;
+      padding: 4px 8px;
+      cursor: pointer;
+      opacity: 0.4;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .history-delete:active { opacity: 1; color: var(--danger); }
+
+    /* ===== Modal ===== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: flex-end;
+      z-index: 10;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .modal-title {
+      font-family: var(--font-ja);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+    }
+    .modal-rate {
+      font-family: var(--font-en);
+      font-size: 13px;
+      color: var(--text-dim);
+      padding: 12px;
+      background: var(--surface-2);
+      border-radius: 8px;
+      text-align: center;
+    }
+    .modal-rate strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ===== Utilities ===== */
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="header">
+      <div class="brand">稼ぎカウント</div>
+      <button id="settingsBtn" class="icon-btn" hidden aria-label="設定">⚙</button>
+    </header>
+
+    <!-- Setup View -->
+    <section id="setupView" hidden>
+      <div class="setup-title">初期設定</div>
+      <form class="setup-form" id="setupForm">
+        <div class="field">
+          <label for="setupSalary">月給（円）</label>
+          <input id="setupSalary" type="number" inputmode="numeric" placeholder="300000" min="1" required>
+        </div>
+        <div class="field">
+          <label for="setupDays">月の稼働日数（日）</label>
+          <input id="setupDays" type="number" inputmode="numeric" placeholder="20" min="1" max="31" required>
+          <div class="hint">1日8時間勤務として計算します</div>
+        </div>
+        <button type="submit" class="btn btn-primary">保存して開始</button>
+      </form>
+    </section>
+
+    <!-- Main View -->
+    <section id="mainView" hidden>
+      <div class="counter-card">
+        <div class="counter-label" id="counterLabel">勤務開始を押してください</div>
+        <div class="counter-amount idle" id="counterAmount">¥0</div>
+        <div class="counter-sub">
+          <div class="counter-sub-item">
+            <div class="counter-sub-label">経過時間</div>
+            <div class="counter-sub-value" id="counterElapsed">00:00:00</div>
+          </div>
+          <div class="counter-sub-divider"></div>
+          <div class="counter-sub-item">
+            <div class="counter-sub-label">秒給</div>
+            <div class="counter-sub-value" id="counterPerSec">¥0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="startBtn" class="btn btn-primary">勤務開始</button>
+        <button id="endBtn" class="btn btn-danger" hidden>勤務終了</button>
+      </div>
+
+      <div class="history">
+        <div class="history-header">
+          <div class="history-title">履歴</div>
+          <div class="history-total" id="historyTotal"></div>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-title">設定</div>
+      <form class="setup-form" id="settingsForm">
+        <div class="field">
+          <label for="settingsSalary">月給（円）</label>
+          <input id="settingsSalary" type="number" inputmode="numeric" min="1" required>
+        </div>
+        <div class="field">
+          <label for="settingsDays">月の稼働日数（日）</label>
+          <input id="settingsDays" type="number" inputmode="numeric" min="1" max="31" required>
+        </div>
+        <div class="modal-rate" id="settingsRate"></div>
+        <button type="submit" class="btn btn-primary">保存</button>
+        <button type="button" id="settingsCancel" class="btn btn-ghost">キャンセル</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ===== Storage =====
+    const STORAGE = {
+      SETTINGS: 'work-motivation:settings',
+      ACTIVE: 'work-motivation:active',
+      HISTORY: 'work-motivation:history',
+    };
+
+    const loadJSON = (key, fallback) => {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch { return fallback; }
+    };
+    const saveJSON = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+    const clearKey = (key) => localStorage.removeItem(key);
+
+    // ===== Domain =====
+    const HOURS_PER_DAY = 8;
+    const perSecond = (s) => s.monthlySalary / (s.workDays * HOURS_PER_DAY * 3600);
+    const fmtYen = (n) => '¥' + Math.floor(n).toLocaleString('ja-JP');
+    const fmtDuration = (sec) => {
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = Math.floor(sec % 60);
+      const pad = (v) => v.toString().padStart(2, '0');
+      return `${pad(h)}:${pad(m)}:${pad(s)}`;
+    };
+    const fmtDate = (ts) => {
+      const d = new Date(ts);
+      const mm = (d.getMonth() + 1).toString().padStart(2, '0');
+      const dd = d.getDate().toString().padStart(2, '0');
+      return `${mm}/${dd}`;
+    };
+
+    // ===== Elements =====
+    const el = {
+      setupView: document.getElementById('setupView'),
+      setupForm: document.getElementById('setupForm'),
+      setupSalary: document.getElementById('setupSalary'),
+      setupDays: document.getElementById('setupDays'),
+      mainView: document.getElementById('mainView'),
+      counterLabel: document.getElementById('counterLabel'),
+      counterAmount: document.getElementById('counterAmount'),
+      counterElapsed: document.getElementById('counterElapsed'),
+      counterPerSec: document.getElementById('counterPerSec'),
+      startBtn: document.getElementById('startBtn'),
+      endBtn: document.getElementById('endBtn'),
+      settingsBtn: document.getElementById('settingsBtn'),
+      historyList: document.getElementById('historyList'),
+      historyTotal: document.getElementById('historyTotal'),
+      settingsModal: document.getElementById('settingsModal'),
+      settingsForm: document.getElementById('settingsForm'),
+      settingsSalary: document.getElementById('settingsSalary'),
+      settingsDays: document.getElementById('settingsDays'),
+      settingsRate: document.getElementById('settingsRate'),
+      settingsCancel: document.getElementById('settingsCancel'),
+    };
+
+    // ===== State =====
+    let tickTimer = null;
+
+    // ===== Rendering =====
+    function showSetup() {
+      el.setupView.hidden = false;
+      el.mainView.hidden = true;
+      el.settingsBtn.hidden = true;
+      setTimeout(() => el.setupSalary.focus(), 100);
+    }
+
+    function showMain() {
+      el.setupView.hidden = true;
+      el.mainView.hidden = false;
+      el.settingsBtn.hidden = false;
+    }
+
+    function renderCounter() {
+      const settings = loadJSON(STORAGE.SETTINGS, null);
+      const active = loadJSON(STORAGE.ACTIVE, null);
+      if (!settings) return;
+
+      const rate = perSecond(settings);
+      el.counterPerSec.textContent = fmtYen(rate);
+
+      if (active) {
+        const elapsedSec = (Date.now() - active.startedAt) / 1000;
+        const earned = elapsedSec * rate;
+        el.counterAmount.textContent = fmtYen(earned);
+        el.counterAmount.classList.remove('idle');
+        el.counterAmount.classList.remove('pulse');
+        void el.counterAmount.offsetWidth;
+        el.counterAmount.classList.add('pulse');
+        el.counterElapsed.textContent = fmtDuration(elapsedSec);
+        el.counterLabel.textContent = '稼働中';
+        el.startBtn.hidden = true;
+        el.endBtn.hidden = false;
+      } else {
+        el.counterAmount.textContent = '¥0';
+        el.counterAmount.classList.add('idle');
+        el.counterElapsed.textContent = '00:00:00';
+        el.counterLabel.textContent = '勤務開始を押してください';
+        el.startBtn.hidden = false;
+        el.endBtn.hidden = true;
+      }
+    }
+
+    function startTick() {
+      stopTick();
+      renderCounter();
+      tickTimer = setInterval(renderCounter, 1000);
+    }
+    function stopTick() {
+      if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
+    }
+
+    function renderHistory() {
+      const history = loadJSON(STORAGE.HISTORY, []);
+      el.historyList.innerHTML = '';
+      if (!history.length) {
+        const empty = document.createElement('div');
+        empty.className = 'history-empty';
+        empty.textContent = '記録なし';
+        el.historyList.appendChild(empty);
+        el.historyTotal.textContent = '';
+        return;
+      }
+      const sorted = [...history].sort((a, b) => b.startedAt - a.startedAt);
+      const total = sorted.reduce((acc, h) => acc + h.amount, 0);
+      el.historyTotal.textContent = '累計 ' + fmtYen(total);
+
+      sorted.forEach((h) => {
+        const row = document.createElement('div');
+        row.className = 'history-item';
+        const date = document.createElement('div');
+        date.className = 'history-date';
+        date.textContent = fmtDate(h.startedAt);
+        const dur = document.createElement('div');
+        dur.className = 'history-duration';
+        dur.textContent = fmtDuration(h.seconds);
+        const amount = document.createElement('div');
+        amount.className = 'history-amount';
+        amount.textContent = fmtYen(h.amount);
+        const del = document.createElement('button');
+        del.className = 'history-delete';
+        del.textContent = '×';
+        del.setAttribute('aria-label', '削除');
+        del.addEventListener('click', () => {
+          if (!confirm('この記録を削除しますか？')) return;
+          const list = loadJSON(STORAGE.HISTORY, []).filter((x) => x.id !== h.id);
+          saveJSON(STORAGE.HISTORY, list);
+          renderHistory();
+        });
+        row.append(date, dur, amount, del);
+        el.historyList.appendChild(row);
+      });
+    }
+
+    // ===== Actions =====
+    function startWork() {
+      const active = { startedAt: Date.now() };
+      saveJSON(STORAGE.ACTIVE, active);
+      startTick();
+    }
+
+    function endWork() {
+      const settings = loadJSON(STORAGE.SETTINGS, null);
+      const active = loadJSON(STORAGE.ACTIVE, null);
+      if (!settings || !active) return;
+      const endedAt = Date.now();
+      const seconds = (endedAt - active.startedAt) / 1000;
+      const amount = Math.floor(seconds * perSecond(settings));
+      if (seconds < 1) {
+        if (!confirm('1秒未満ですが終了しますか？（記録は残りません）')) return;
+        clearKey(STORAGE.ACTIVE);
+        stopTick();
+        renderCounter();
+        return;
+      }
+      const entry = {
+        id: `${active.startedAt}-${endedAt}`,
+        startedAt: active.startedAt,
+        endedAt,
+        seconds,
+        amount,
+      };
+      const history = loadJSON(STORAGE.HISTORY, []);
+      history.push(entry);
+      saveJSON(STORAGE.HISTORY, history);
+      clearKey(STORAGE.ACTIVE);
+      stopTick();
+      renderCounter();
+      renderHistory();
+    }
+
+    function openSettings() {
+      const s = loadJSON(STORAGE.SETTINGS, { monthlySalary: 0, workDays: 0 });
+      el.settingsSalary.value = s.monthlySalary;
+      el.settingsDays.value = s.workDays;
+      updateSettingsRate();
+      el.settingsModal.classList.add('open');
+    }
+    function closeSettings() {
+      el.settingsModal.classList.remove('open');
+    }
+    function updateSettingsRate() {
+      const salary = Number(el.settingsSalary.value);
+      const days = Number(el.settingsDays.value);
+      if (salary > 0 && days > 0) {
+        const rate = salary / (days * HOURS_PER_DAY * 3600);
+        const hourly = salary / (days * HOURS_PER_DAY);
+        el.settingsRate.innerHTML = `時給 <strong>${fmtYen(hourly)}</strong> ／ 秒給 <strong>${fmtYen(rate)}</strong>`;
+      } else {
+        el.settingsRate.textContent = '';
+      }
+    }
+
+    // ===== Event wiring =====
+    el.setupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const monthlySalary = Number(el.setupSalary.value);
+      const workDays = Number(el.setupDays.value);
+      if (!(monthlySalary > 0) || !(workDays > 0)) return;
+      saveJSON(STORAGE.SETTINGS, { monthlySalary, workDays });
+      showMain();
+      renderCounter();
+      renderHistory();
+    });
+
+    el.startBtn.addEventListener('click', startWork);
+    el.endBtn.addEventListener('click', endWork);
+    el.settingsBtn.addEventListener('click', openSettings);
+    el.settingsCancel.addEventListener('click', closeSettings);
+    el.settingsModal.addEventListener('click', (e) => {
+      if (e.target === el.settingsModal) closeSettings();
+    });
+    el.settingsSalary.addEventListener('input', updateSettingsRate);
+    el.settingsDays.addEventListener('input', updateSettingsRate);
+    el.settingsForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const monthlySalary = Number(el.settingsSalary.value);
+      const workDays = Number(el.settingsDays.value);
+      if (!(monthlySalary > 0) || !(workDays > 0)) return;
+      saveJSON(STORAGE.SETTINGS, { monthlySalary, workDays });
+      closeSettings();
+      renderCounter();
+    });
+
+    // Pause tick when tab hidden to save battery; resume on visible.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopTick();
+      } else {
+        const active = loadJSON(STORAGE.ACTIVE, null);
+        if (active) startTick();
+        else renderCounter();
+      }
+    });
+
+    // ===== Boot =====
+    (function init() {
+      const settings = loadJSON(STORAGE.SETTINGS, null);
+      if (!settings) {
+        showSetup();
+        return;
+      }
+      showMain();
+      renderHistory();
+      const active = loadJSON(STORAGE.ACTIVE, null);
+      if (active) startTick();
+      else renderCounter();
+    })();
+  </script>
+</body>
+</html>
