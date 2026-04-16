@@ -228,7 +228,7 @@
       letter-spacing: 0;
     }
     .counter-amount .number {
-      font-size: clamp(56px, 16vw, 88px);
+      font-size: clamp(84px, 26vw, 136px);
       transition: opacity 0.2s;
     }
 
@@ -256,16 +256,16 @@
 
     /* ===== Trivia ===== */
     .counter-trivia {
-      margin-top: 28px;
-      padding-top: 20px;
+      margin-top: 36px;
+      padding-top: 24px;
       border-top: 1px solid var(--line);
-      font-size: 12.5px;
-      line-height: 1.65;
-      color: var(--text-dim);
-      min-height: 42px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+      min-height: 54px;
       opacity: 1;
       transition: opacity 0.28s ease;
-      letter-spacing: -0.002em;
+      letter-spacing: -0.004em;
     }
     .counter-trivia.fade { opacity: 0; }
     .counter-trivia:empty { display: none; }
@@ -273,15 +273,22 @@
       display: inline-block;
       font-family: var(--font-mono);
       font-size: 10px;
-      color: var(--text-quiet);
-      letter-spacing: 0.04em;
-      margin-right: 8px;
-      transform: translateY(-1px);
+      color: var(--bg);
+      background: var(--text);
+      padding: 3px 7px;
+      border-radius: 3px;
+      letter-spacing: 0.1em;
+      margin-right: 10px;
+      vertical-align: 2px;
+      font-weight: 500;
     }
     .counter-trivia .num {
-      color: var(--text);
       font-variant-numeric: tabular-nums;
-      font-weight: 500;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .counter-trivia #triviaText {
+      color: var(--text-dim);
     }
 
     /* ===== Buttons ===== */
@@ -643,39 +650,101 @@
     // ===== Trivia Data =====
     // 1秒あたりのざっくり推定値。数字は概算で、読み物として楽しめる桁感を優先。
     const WORLD_FACTS = [
+      // 生命
       (s) => `新生児が <span class="num">${jpNum(4.3 * s)}人</span> この世に生まれた`,
       (s) => `<span class="num">${jpNum(1.8 * s)}人</span> が 息を引き取った`,
       (s) => `心臓が <span class="num">${jpNum(1.1 * s)}回</span> 鼓動した`,
+      (s) => `世界で <span class="num">${jpNum(45 / 60 * s)}組</span> の夫婦が誕生した`,
+      (s) => `世界の蚊が <span class="num">${jpNum(800000 * s)}人</span> を刺した`,
+      (s) => `世界で <span class="num">${jpNum(180000 * s)}本</span> タバコが吸われた`,
+
+      // 天体・物理
       (s) => `地球が太陽の周りを <span class="num">${jpNum(30 * s)}km</span> 進んだ`,
+      (s) => `太陽から <span class="num">${jpNum(400 * s)}万トン</span> の質量が失われた`,
+      (s) => `地球が自転で赤道上 <span class="num">${jpNum(465 * s)}m</span> 回った`,
+      (s) => `宇宙は <span class="num">${jpNum(70 * s)}km/s/Mpc</span> のペースで膨張し続けた`,
+
+      // ネット・テック
       (s) => `Google検索が <span class="num">${jpNum(100000 * s)}回</span> 実行された`,
       (s) => `X（旧Twitter）に <span class="num">${jpNum(6000 * s)}件</span> 投稿された`,
       (s) => `YouTubeに <span class="num">${jpNum1(8.33 * s)}時間分</span> の動画がアップされた`,
-      (s) => `ビル・ゲイツの資産が 約<span class="num">${jpNum(300 * s)}ドル</span> 増えた`,
-      (s) => `マクドナルドで <span class="num">${jpNum(75 * s)}個</span> バーガーが売れた`,
-      (s) => `Amazonが <span class="num">${jpNum(460 * s)}個</span> 荷物を配達した`,
-      (s) => `世界で <span class="num">${jpNum(22000 * s)}本</span> コカ・コーラが開けられた`,
-      (s) => `<span class="num">${jpNum1(7.5 * s)}台</span> iPhoneが販売された`,
-      (s) => `世界の空港に <span class="num">${jpNum(s)}機</span> 飛行機が着陸した`,
-      (s) => `世界で <span class="num">${jpNum(1270 * s)}kg</span> の CO₂ が排出された`,
-      (s) => `日本のコンビニで <span class="num">${jpNum(55 * s)}個</span> おにぎりが売れた`,
-      (s) => `Wikipediaが <span class="num">${jpNum(2 * s)}回</span> 編集された`,
       (s) => `Netflixが <span class="num">${jpNum1(3400 * s)}時間</span> 視聴された`,
       (s) => `世界で <span class="num">${jpNum(2800000 * s)}通</span> メールが送信された`,
+      (s) => `Discordに <span class="num">${jpNum(11574 * s)}件</span> のメッセージが送られた`,
+      (s) => `Wikipediaが <span class="num">${jpNum(2 * s)}回</span> 編集された`,
+      (s) => `Instagramに <span class="num">${jpNum(1000 * s)}件</span> 写真が投稿された`,
+      (s) => `TikTokが <span class="num">${jpNum(37 * s)}回</span> ダウンロードされた`,
+
+      // 経済・消費
+      (s) => `ビル・ゲイツの資産が 約<span class="num">${jpNum(300 * s)}ドル</span> 増えた`,
+      (s) => `イーロン・マスクの資産が 約<span class="num">${jpNum(3000 * s)}ドル</span> 増えた`,
+      (s) => `マクドナルドで <span class="num">${jpNum(75 * s)}個</span> バーガーが売れた`,
+      (s) => `Amazonが <span class="num">${jpNum(460 * s)}個</span> 荷物を配達した`,
+      (s) => `Amazonが 約<span class="num">${jpNum(4700 * s)}ドル</span> 売り上げた`,
+      (s) => `世界で <span class="num">${jpNum(22000 * s)}本</span> コカ・コーラが開けられた`,
+      (s) => `<span class="num">${jpNum1(7.5 * s)}台</span> iPhoneが販売された`,
+      (s) => `<span class="num">${jpNum1(2.6 * s)}台</span> の自動車が生産された`,
+      (s) => `世界で <span class="num">${jpNum1(350 * s)}枚</span> ピザが焼けた`,
+      (s) => `世界で <span class="num">${jpNum(250 * s)}kg</span> チョコレートが消費された`,
+      (s) => `世界の鉛筆工場から <span class="num">${jpNum(450 * s)}本</span> 鉛筆が出荷された`,
+
+      // 地球環境
+      (s) => `世界の空港に <span class="num">${jpNum(s)}機</span> 飛行機が着陸した`,
+      (s) => `世界で <span class="num">${jpNum(1270 * s)}kg</span> の CO₂ が排出された`,
+      (s) => `世界の森林が <span class="num">${jpNum1(1.3 * s)}ヘクタール</span> 失われた`,
+      (s) => `海に <span class="num">${jpNum(8 * s)}kg</span> のプラスチックが流れ込んだ`,
+      (s) => `世界で <span class="num">${jpNum(12600 * s)}kg</span> の紙が消費された`,
+      (s) => `世界で <span class="num">${jpNum(25000 * s)}kWh</span> の電力が使われた`,
+      (s) => `世界で <span class="num">${jpNum(6000 * s)}ℓ</span> のビールが醸造された`,
+
+      // 日本ローカル
+      (s) => `日本のコンビニで <span class="num">${jpNum(55 * s)}個</span> おにぎりが売れた`,
       (s) => `日本でビールが <span class="num">${jpNum(180 * s)}本</span> 開けられた`,
       (s) => `日本のタクシーが 延べ <span class="num">${jpNum(30 * s)}台</span> 乗車された`,
+      (s) => `日本のコンビニに <span class="num">${jpNum(115 * s)}人</span> の客が入った`,
+      (s) => `日本で <span class="num">${jpNum(143 * s)}パック</span> 納豆が食べられた`,
+      (s) => `日本郵便が <span class="num">${jpNum(347 * s)}通</span> 配達した`,
+      (s) => `東京の電車が 延べ <span class="num">${jpNum(13 * s)}人</span> を運んだ`,
+
+      // ちょっと遊び
+      (s) => `世界の電子レンジが <span class="num">${jpNum(11574 * s)}回</span>「チン」と鳴った`,
+      (s) => `人類の体毛合計が <span class="num">${jpNum(80 * s)}m</span> 伸びた`,
+      (s) => `世界で <span class="num">${jpNum(30000 * s)}回</span> Tinderの右スワイプが発生した`,
     ];
 
     const ERAS = [
+      // 江戸以前
+      { era: '戦国時代', job: '足軽（年俸米10石）', monthlyYen: 42000 },
+      { era: '江戸中期', job: '大工', monthlyYen: 125000 },
+      { era: '江戸中期', job: '長屋暮らしの町人', monthlyYen: 40000 },
+      // 明治
       { era: '明治10年', job: '小学校教師', monthlyYen: 10 },
+      { era: '明治15年', job: '巡査', monthlyYen: 6 },
+      { era: '明治23年', job: '福沢諭吉（慶應義塾）', monthlyYen: 100 },
+      { era: '明治25年', job: '新聞記者', monthlyYen: 25 },
       { era: '明治40年', job: '夏目漱石の朝日新聞社員', monthlyYen: 200 },
+      // 大正
       { era: '大正元年', job: '銀行員', monthlyYen: 50 },
+      { era: '大正3年', job: '電話交換手', monthlyYen: 25 },
+      { era: '大正10年', job: '中学校教員', monthlyYen: 45 },
       { era: '大正14年', job: '総理大臣', monthlyYen: 800 },
+      // 昭和
       { era: '昭和5年', job: '国家公務員（大卒初任給）', monthlyYen: 75 },
+      { era: '昭和10年', job: '鉄道員', monthlyYen: 70 },
+      { era: '昭和20年', job: '教員（戦後）', monthlyYen: 200 },
+      { era: '昭和25年', job: '大卒初任給', monthlyYen: 3000 },
       { era: '昭和30年', job: '大卒初任給', monthlyYen: 5600 },
+      { era: '昭和35年', job: '大卒初任給', monthlyYen: 13467 },
       { era: '昭和40年', job: '大卒初任給', monthlyYen: 19610 },
+      { era: '昭和45年', job: '大卒初任給', monthlyYen: 39900 },
       { era: '昭和50年', job: '大卒初任給', monthlyYen: 89300 },
+      { era: '昭和55年', job: '大卒初任給', monthlyYen: 121800 },
       { era: '昭和60年', job: '大卒初任給', monthlyYen: 140000 },
+      // 平成
+      { era: '平成元年', job: '大卒初任給', monthlyYen: 160900 },
       { era: '平成10年', job: '大卒初任給', monthlyYen: 195500 },
+      { era: '平成20年', job: '大卒初任給', monthlyYen: 201300 },
+      // 令和
       { era: '令和6年', job: '大卒初任給', monthlyYen: 237300 },
     ];
 
